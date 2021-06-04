@@ -39,9 +39,10 @@ def scrape():
             nums.append(i)
         writer.writerow(['Country Name'] + nums)
         # for each position of a member of country_list in the wiki table
+        NUM_COUNTRIES = 4
         for i in positions:
             # gives 0->3
-            for j in range(4):
+            for j in range(NUM_COUNTRIES):
                 # go through each table and create a cells variable then append its data for that table to countryInfo
                 # go to that row in the table to extract the data about that country we want, with +1 for adjustment
                 rows = tables[j].find_all('tr')[i+1]
@@ -49,10 +50,13 @@ def scrape():
                 cells = rows.find_all('td')
                 title = cells[0].find('a').get('title')
                 # create a list with the title of the country, and the VALUES (by stripping our cells) of gdp associated with that from that table
+                # print(int(cell.text.strip().replace(',', '')) for cell in cells[1:])
+                lst = [int(cell.text.strip().replace(',', '').replace('$', ''))
+                       for cell in cells[1:] if cell.text.strip().replace(',', '').replace('$', '')]
                 if j == 0:
-                    countryInfo = [title] + [int(cell.text.strip().replace(',', '')) for cell in cells[1:]]
+                    countryInfo = [title] + lst
                 else:
-                    countryInfo = countryInfo + [int(cell.text.strip().replace(',', '')) for cell in cells[1:]]
+                    countryInfo += lst
             writer.writerow(countryInfo)
 
 def plot():
@@ -63,5 +67,6 @@ def plot():
     ax.set_ylabel("GDP per capita ($)")
     plt.show()
 
-scrape()
-plot()
+if __name__ == '__main__':
+    scrape()
+    plot()
